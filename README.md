@@ -1,10 +1,19 @@
-## Password Generator
+## Pass-Fail: How Quickly Can Your Password Be Cracked?
 
-We create a character level text generator using an encoder-decoder model with the passwords that are leaked
-from these [databases](https://github.com/danielmiessler/SecLists/tree/master/Passwords/Leaked-Databases)
+We create a character level password generator using an encoder-decoder model using ~18M leaked passwords from [various databases](https://github.com/danielmiessler/SecLists/tree/master/Passwords/Leaked-Databases) to test the robustness of passwords. We then validate the model against the [HaveIBeenPwned (HIBP)](https://haveibeenpwned.com/) database. We find that of the roughly 10,000 model generated passwords, 69% match a password in the HIBP database compared to .3% of the 10,000 randomly generated passwords.
+
+### Table of Contents
+
+* [Data](#data)
+* [Model](#scripts)
+* [Metrics](#metrics)
+* [Validation](#validation)
+* [Password Embeddings](#embeddings)
 
 ### Data
-Below are the dumps used to create a master password database. You can find more details in this [notebook](notebooks/data.ipynb)
+
+We created the master password database by merging data from the following [leaked password databases](https://github.com/danielmiessler/SecLists/tree/master/Passwords/Leaked-Databases). (Note: We are aware that bible is merely a collection of all the words in bible---or so it seems---and have chosen to keep it as a dictionary.) You can find more details in this [notebook](notebooks/data.ipynb).
+
 ```
 rockyou.txt
 000webhost.txt
@@ -31,27 +40,23 @@ tuscl.txt
 youporn2012.txt
 ```
 
-After merging all above, the total count came to 18308617 passwords (18 million passwords).
+After merging the above, the total count came to 18308617 passwords (18 million passwords).
 
-Note: We only considered passwords that have length between 3 and 50. 
+We only consider passwords that are between 3 and 50 characters long. Only a tiny fraction of passwords are over 50 character long. And the 3 character lower limit eliminates many of the short words from `bible`, etc.
 
-### Scripts
-#### Vocabulary
-The vocabulary size is 96. Below are some stats on data
-```
-Total number of passwords 18308617
-Passwords vocab size 95
-Max passwords length 50
-```
-#### Data setup
+### Model
+
+The vocabulary size is 95. 
+
+#### Data Setup
+
 Sequence to sequence is used to train Tensorflow GRU model.<br>
-For example: if password is `12STEVEN` <br>
-then Input to model is `12STEVE` <br>
-Output from the model is `2STEVEN` <br>
-Data is split as 90% for training, 5% for validation, 5% for test.<br>
+For example: if the password is `12STEVEN` <br>
+then the input to the model is `12STEVE` <br>
+And the prediction label is `2STEVEN` <br>
+Data is split as follows: 90% for training, 5% for validation, 5% for test.<br>
 
-#### Model
-Below is the GRU model used
+Below is the GRU model that we used
 ```
 _________________________________________________________________
 Layer (type)                 Output Shape              Param #   
@@ -69,8 +74,9 @@ _________________________________________________________________
 ```
 Model was trained on char sequence to char sequence.
 
-#### Metrics
-[nltp bleu](https://www.nltk.org/_modules/nltk/translate/bleu_score.html) score is used to measure the model performance. <br>
+### Metrics
+
+We used the [bleu](https://www.nltk.org/_modules/nltk/translate/bleu_score.html) score to measure the model performance. <br>
 Below are some examples - <br>
 **if all are equal**
 ```python
@@ -94,11 +100,13 @@ corpus_bleu(ref, hyp, weights=[0.25])
 ```
 output - `0`<br>
 
-The bleu score on complete test dataset came to `0.478` <br>
-After training the model for 4 epochs the bleu score on test dataset increased to `0.746`
+The bleu score on the test dataset is `0.48` <br>
+After training the model for 4 epochs the bleu score on the test dataset increased to `0.75`
 
-#### Learnings
-Given a password `Password1` (of length 9), when we fed `P` to the model, model took 1026 attempts to find the password. 
+### Validation
+
+How quickly can we guess the password `Password1` (of length 9) when we feed `P` to the model? The model takes 1026 attempts to find the password (compared to 315 quadrillion attempts on average using random password generation with 95 tokens) 
+
 ```
 1 - PANDOWCOM
 2 - Politim12
@@ -145,12 +153,12 @@ Passwords starting with each char distribution is like below. Showing top 10 cha
  ('s', 0.05710338470677496),
  ('m', 0.057332020217583886)]
 ```
-With above we can see that most number of passwords start with `m`, `s`, `0` so on. 
+As we can see, passwords most frequently start with `m`, followed by `s`, `0`, and so on. 
 
-In below table, <br>
+In the table below, <br>
 `dist` - start character distribution across all passwords<br>
 `rand_pred_prob` - Percent of passwords found in [https://haveibeenpwned.com/](https://haveibeenpwned.com/)  when passwords are generated randomly. <br>
-`model_pred_prob` - Percent of passwords that were found in [https://haveibeenpwned.com/](https://haveibeenpwned.com/)  when passwords were generated using trained model. The model predictablility rate depends on start char distribution, if a start char has more distribution then model is able to predict more leaked passwords.   
+`model_pred_prob` - Percent of passwords that were found in [https://haveibeenpwned.com/](https://haveibeenpwned.com/)  when passwords were generated using trained model. The model predictablility rate depends on start char distribution. If a start char is common, the model is able to predict more leaked passwords.  
 
 
 |	|char|	dist	|rand_pred_prob	|model_pred_prob|
@@ -217,15 +225,15 @@ In below table, <br>
 |1	|pipe	|0.000009	|0.00	|0.00 |
 |0	|}	|0.000003	|0.00	|0.00 |
 
-Please refer [full notebook](notebooks/train_tf_seq_to_seq.ipynb) for complete steps involved in creating this model. 
+Please refer to the [full notebook](notebooks/train_tf_seq_to_seq.ipynb) for the steps involved in creating the model. 
 
-#### Password Embeddings
-Please refer below files for the password embeddings. <br>
-- [password vectors](embeddings/password_tf_vectors.tsv)
-- [password metadata](embeddings/password_tf_metadata.tsv)
+### Embeddings
+
+* [password vectors](embeddings/password_tf_vectors.tsv)
+* [password metadata](embeddings/password_tf_metadata.tsv)
 
 You can use http://projector.tensorflow.org/ to visualize the embeddings.
 
 ### Authors
 
-Rajashekar Chintalapati and Gaurav Sood 
+Rajashekar Chintalapati and Gaurav Sood
