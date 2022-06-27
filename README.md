@@ -5,9 +5,9 @@ We create a character level password generator using an encoder-decoder model us
 ### Table of Contents
 
 * [Data](#data)
-* [Model](#scripts)
+* [Model](#model)
 * [Metrics](#metrics)
-* [Validation](#validation)
+* [Practical Validation](#validation)
 * [Password Embeddings](#embeddings)
 
 ### Data
