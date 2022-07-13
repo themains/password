@@ -6,7 +6,11 @@ We use the model to understand one of the correlates of a strong password---the 
 
 Our model can also be used to estimate the strength of a password. Admittedly, the job is computationally heavy. And approximate inference based on, e.g., maximum percentage matched in the first 100 tries, may be useful. For illustration, [our generator](https://github.com/themains/password/blob/main/notebooks/03_tf_seq_to_seq_tranining_18M.ipynb) can recover the password 'Password1' in ~ 1000 tries when the search space for nine-character passwords with 95 tokens is in the quadrillions.
 
-Note: We are aware that hackers can use the model to crack passwords, but we believe the computational cost of running the model for such inference is likely too high when compared to brute force or dictionary-based methods or methods that exploit common patterns in passwords.
+Note: 
+
+1. We are aware that hackers can use the model to crack passwords, but we believe the computational cost of running the model for such inference is likely too high when compared to brute force or dictionary-based methods or methods that exploit common patterns in passwords.
+
+2. We are also aware that if lots of people use the model to start using uncommon patterns, e.g., $ as a starting character, then over time, these patterns become more common, upending the benefits of the model. Any product building off this should account for this point. The solution for this is plausibly to keep building models based on new data
 
 ### Table of Contents
 
