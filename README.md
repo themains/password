@@ -18,7 +18,7 @@ Note: We are aware that hackers can use the model to crack passwords, but we bel
 
 ### Data
 
-We created the master password database by merging data from the following [leaked password databases](https://github.com/danielmiessler/SecLists/tree/master/Passwords/Leaked-Databases). (Note: We are aware that bible is merely a collection of all the words in bible---or so it seems---and have chosen to keep it as a dictionary.) You can find more details in this [notebook](notebooks/01_data.ipynb).
+We created the master password database by merging data from the following [leaked password databases](https://github.com/danielmiessler/SecLists/tree/master/Passwords/Leaked-Databases). (Note: We are aware that the bible is merely a collection of all the words in the bible---or so it seems---and have chosen to keep it as a dictionary.) You can find more details in this [notebook](notebooks/01_data.ipynb).
 
 ```
 passwords_db/000webhost.txt      passwords_db/izmy.txt
@@ -37,7 +37,7 @@ passwords_db/hotmail.txt         passwords_db/youporn2012.txt
 
 After merging the above, the total count came to 881623002 passwords (881 million passwords).
 
-We only consider passwords that are between 3 and 50 characters long. Only a tiny fraction of passwords are over 50 character long. And the 3 character lower limit eliminates many of the short words from `bible`, etc.
+We only consider passwords that are between 3 and 50 characters long. Only a tiny fraction of passwords are over 50 characters long. And the three-character lower limit eliminates many of the short words from `bible,` etc.
 
 ### Model
 
@@ -51,7 +51,7 @@ then the input to the model is `12STEVE` <br>
 And the prediction label is `2STEVEN` <br>
 Data is split as follows: 95% for training, 2.5% for validation, 2.5% for test.<br>
 You can find more details on how the data is split in this [notebook](notebooks/01_data.ipynb).<br>
-Since loading all train data to memory requires more than 200+ GB RAM, tf records are created, you can refer to this [notebook](notebooks/02_tf_records.ipynb) on how this is done.
+Since loading all train data to memory requires more than 200+ GB RAM, we created tf records. (See this [notebook](notebooks/02_tf_records.ipynb) for the details.)
 
 Below is the GRU model that we used
 ```
@@ -69,7 +69,7 @@ Trainable params: 305,760
 Non-trainable params: 0
 _________________________________________________________________
 ```
-Model was trained on char sequence to char sequence.
+We use a sequence-to-sequence model.
 
 ### Metrics
 
@@ -98,7 +98,7 @@ corpus_bleu(ref, hyp, weights=[0.25])
 output - `0`<br>
 
 The bleu score on the test dataset is `0.02` <br>
-After training the model for 10 epochs the bleu score on the test dataset increased to `0.96`
+After training the model for ten epochs, the bleu score on the test dataset increased to `0.96`
 
 ### Validation
 
